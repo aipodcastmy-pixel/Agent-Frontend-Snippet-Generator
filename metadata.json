@@ -1,0 +1,5 @@
+{
+  "name": "Agent Frontend Snippet Generator",
+  "description": "An interactive, AI-powered web application that generates and iteratively refines frontend code snippets (HTML, CSS, JavaScript) based on user prompts. The application features a live preview and a unique 'Auto-Improve' mode where the AI uses visual feedback to enhance the UI/UX.",
+  "requestFramePermissions": []
+}

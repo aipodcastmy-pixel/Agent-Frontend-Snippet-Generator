@@ -1,18 +1,20 @@
-
 import React, { useState, useRef } from 'react';
 import { CodeSnippet } from '../types';
 import CodeDisplay from './CodeDisplay';
 import Preview from './Preview';
 import { EyeIcon, CodeIcon } from './Icons';
+import Spinner from './Spinner';
 
 interface WorkspacePanelProps {
   code: CodeSnippet;
   iframeRef: React.RefObject<HTMLIFrameElement>;
+  isLoading: boolean;
+  isImproving: boolean;
 }
 
 type Tab = 'preview' | 'html' | 'css' | 'js';
 
-const WorkspacePanel: React.FC<WorkspacePanelProps> = ({ code, iframeRef }) => {
+const WorkspacePanel: React.FC<WorkspacePanelProps> = ({ code, iframeRef, isLoading, isImproving }) => {
   const [activeTab, setActiveTab] = useState<Tab>('preview');
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -37,6 +39,7 @@ const WorkspacePanel: React.FC<WorkspacePanelProps> = ({ code, iframeRef }) => {
     }
   };
 
+  const showSpinner = (isLoading || isImproving) && activeTab === 'preview';
 
   return (
     <div className="w-full flex flex-col h-full bg-gray-900">
@@ -65,7 +68,15 @@ const WorkspacePanel: React.FC<WorkspacePanelProps> = ({ code, iframeRef }) => {
           ))}
         </div>
       </div>
-      <div className="flex-1 overflow-auto bg-gray-900">
+      <div className="flex-1 overflow-auto bg-gray-900 relative">
+        {showSpinner && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-80 z-20" role="status" aria-live="polite">
+            <Spinner />
+            <p className="mt-4 text-lg text-gray-300">
+              {isImproving ? 'Improving component...' : 'Generating component...'}
+            </p>
+          </div>
+        )}
         <div id="tabpanel-preview" role="tabpanel" tabIndex={0} aria-labelledby="tab-preview" hidden={activeTab !== 'preview'} className="h-full">
            <Preview code={code} iframeRef={iframeRef} />
         </div>

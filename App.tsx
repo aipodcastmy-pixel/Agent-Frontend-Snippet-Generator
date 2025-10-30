@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ChatPanel from './components/ChatPanel';
 import WorkspacePanel from './components/WorkspacePanel';
@@ -230,7 +229,12 @@ function App() {
         style={{ width: `${leftPanelWidth}%` }}
         aria-label="Workspace Panel"
       >
-        <WorkspacePanel code={code} iframeRef={iframeRef} />
+        <WorkspacePanel
+          code={code}
+          iframeRef={iframeRef}
+          isLoading={isLoading}
+          isImproving={isImproving}
+        />
       </main>
       <div
         onMouseDown={handleMouseDown}

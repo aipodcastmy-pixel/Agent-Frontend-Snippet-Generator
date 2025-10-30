@@ -159,7 +159,7 @@ function App() {
                 author: MessageAuthor.AI,
                 content: (
                     <div className="flex flex-col gap-2">
-                        <p className="text-sm italic text-gray-400">Here's my current view (Step {i+1}/{autoImproveSteps}). Analyzing for improvements...</p>
+                        <p className="text-sm italic text-gray-400">This is what I see. Now analyzing this view for improvement step {i + 1} of {autoImproveSteps}...</p>
                         <img 
                             src={`data:image/jpeg;base64,${screenshotBase64}`} 
                             alt={`Preview for improvement step ${i + 1}`}

@@ -48,11 +48,11 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   return (
     <div className="w-full flex flex-col h-full bg-gray-800 border-l border-gray-700">
       <div className="flex-1 p-6 overflow-y-auto">
-        <div className="flex flex-col gap-4">
+        <ul role="log" aria-live="polite" className="flex flex-col gap-4">
           {chatHistory.map((msg, index) => (
-            <div key={index} className={`flex gap-3 ${msg.author === MessageAuthor.USER ? 'justify-end' : ''}`}>
+            <li key={index} className={`flex gap-3 ${msg.author === MessageAuthor.USER ? 'justify-end' : ''}`}>
               {msg.author === MessageAuthor.AI && (
-                <div className="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center" aria-hidden="true">
                   <BotIcon className="w-5 h-5 text-white" />
                 </div>
               )}
@@ -62,15 +62,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                 </div>
               </div>
               {msg.author === MessageAuthor.USER && (
-                <div className="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0 flex items-center justify-center" aria-hidden="true">
                   <UserIcon className="w-5 h-5 text-gray-300" />
                 </div>
               )}
-            </div>
+            </li>
           ))}
            {(isLoading && !isImproving) && (
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center">
+            <li className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center" aria-hidden="true">
                 <BotIcon className="w-5 h-5 text-white" />
               </div>
               <div className="p-3 rounded-lg bg-gray-700 text-gray-200">
@@ -80,10 +80,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                   <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse delay-300"></div>
                 </div>
               </div>
-            </div>
+            </li>
           )}
-          <div ref={chatEndRef} />
-        </div>
+          <li ref={chatEndRef} />
+        </ul>
       </div>
       <div className="p-4 border-t border-gray-700 bg-gray-800">
         <div className="flex items-center justify-between mb-2">
@@ -107,7 +107,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             )}
         </div>
         <div className="relative">
+          <label htmlFor="chat-input" className="sr-only">Type your message</label>
           <textarea
+            id="chat-input"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}

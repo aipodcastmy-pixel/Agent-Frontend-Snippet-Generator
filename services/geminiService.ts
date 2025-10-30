@@ -32,7 +32,7 @@ export const generateInitialSnippet = async (prompt: string, onStream: (chunk: s
     let fullResponseText = '';
     let lastStreamedExplanation = '';
     for await (const chunk of responseStream) {
-        fullResponseText += chunk.text;
+        fullResponseText += chunk.text ?? '';
         
         try {
             // Use a regex to find the explanation in a possibly incomplete JSON string.
@@ -94,7 +94,7 @@ export const improveSnippet = async (
     let fullResponseText = '';
     let lastStreamedExplanation = '';
     for await (const chunk of responseStream) {
-        fullResponseText += chunk.text;
+        fullResponseText += chunk.text ?? '';
         
         try {
             // Use a regex to find the explanation in a possibly incomplete JSON string.

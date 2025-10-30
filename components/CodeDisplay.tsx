@@ -19,9 +19,13 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ language, code }) => {
   return (
     <div className="relative h-full bg-[#0d1117]">
       <div className="absolute top-2 right-2 z-10">
+        <span className="sr-only" aria-live="polite">
+          {copied ? 'Code copied to clipboard!' : ''}
+        </span>
         <button
           onClick={handleCopy}
           className="flex items-center px-3 py-1 bg-gray-700 text-gray-300 text-xs font-semibold rounded-md hover:bg-gray-600 transition-colors"
+          aria-label={`Copy ${language} code`}
         >
           {copied ? (
             <>

@@ -44,6 +44,23 @@ function App() {
     setLeftPanelWidth(newLeftWidth);
   }, [isResizing]);
 
+  const handleSeparatorKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        let newLeftWidth = leftPanelWidth;
+        if (e.key === 'ArrowLeft') {
+            newLeftWidth -= 2;
+        } else {
+            newLeftWidth += 2;
+        }
+
+        if (newLeftWidth < 25) newLeftWidth = 25;
+        if (newLeftWidth > 75) newLeftWidth = 75;
+        setLeftPanelWidth(newLeftWidth);
+    }
+  }, [leftPanelWidth]);
+
+
   useEffect(() => {
     if (isResizing) {
       window.addEventListener('mousemove', handleMouseMove);
@@ -207,19 +224,32 @@ function App() {
 
   return (
     <div className="flex flex-row h-screen font-sans bg-gray-900 text-gray-200 overflow-hidden">
-      <div 
+      <main 
+        id="workspace-panel"
         className="h-full"
         style={{ width: `${leftPanelWidth}%` }}
+        aria-label="Workspace Panel"
       >
         <WorkspacePanel code={code} iframeRef={iframeRef} />
-      </div>
+      </main>
       <div
         onMouseDown={handleMouseDown}
-        className="w-2 h-full cursor-col-resize bg-gray-700 hover:bg-indigo-500 transition-colors duration-200 flex-shrink-0"
+        onKeyDown={handleSeparatorKeyDown}
+        className="w-2 h-full cursor-col-resize bg-gray-700 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors duration-200 flex-shrink-0"
         aria-label="Resize panels"
         role="separator"
+        aria-orientation="vertical"
+        aria-controls="workspace-panel chat-panel"
+        aria-valuenow={Math.round(leftPanelWidth)}
+        aria-valuemin={25}
+        aria-valuemax={75}
+        tabIndex={0}
       />
-      <div className="h-full flex-1">
+      <aside 
+        id="chat-panel"
+        className="h-full flex-1"
+        aria-label="Chat Panel"
+      >
          <ChatPanel
           chatHistory={chatHistory}
           isLoading={isLoading}
@@ -230,7 +260,7 @@ function App() {
           autoImproveSteps={autoImproveSteps}
           onSetAutoImproveSteps={setAutoImproveSteps}
         />
-      </div>
+      </aside>
     </div>
   );
 }

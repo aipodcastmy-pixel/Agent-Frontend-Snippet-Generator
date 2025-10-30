@@ -3,7 +3,8 @@ import ChatPanel from './components/ChatPanel';
 import WorkspacePanel from './components/WorkspacePanel';
 import { ChatMessage, CodeSnippet, MessageAuthor, ImprovementStep } from './types';
 import { generateInitialSnippet, improveSnippet } from './services/geminiService';
-import { BotIcon } from './components/Icons';
+import { APIError, ParsingError } from './services/errors';
+import { BotIcon, AlertTriangleIcon } from './components/Icons';
 
 function App() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
@@ -74,6 +75,24 @@ function App() {
     };
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
+  const setErrorMessageInChat = (message: string) => {
+    const errorContent = (
+        <div className="flex items-center gap-2 text-red-400">
+            <AlertTriangleIcon className="w-5 h-5 flex-shrink-0" />
+            <span>{message}</span>
+        </div>
+    );
+    setChatHistory(prev => {
+        const lastMessage = prev[prev.length - 1];
+        // Replace the AI's empty message or spinner with the error
+        if (lastMessage && lastMessage.author === MessageAuthor.AI) {
+            return [...prev.slice(0, -1), { ...lastMessage, content: errorContent }];
+        }
+        // Or add a new error message if something went wrong unexpectedly
+        return [...prev, { author: MessageAuthor.AI, content: errorContent }];
+    });
+  };
+
 
   const handleSendMessage = useCallback(async (prompt: string) => {
     if (isLoading || isImproving) return;
@@ -101,14 +120,13 @@ function App() {
       }
     } catch (error) {
       console.error(error);
-      const errorMessage = 'Sorry, I encountered an error. Please try again.';
-      setChatHistory(prev => {
-        const lastMessage = prev[prev.length - 1];
-        if (lastMessage && lastMessage.author === MessageAuthor.AI) {
-          return [...prev.slice(0, -1), { ...lastMessage, content: errorMessage }];
-        }
-        return [...prev, { author: MessageAuthor.AI, content: errorMessage }];
-      });
+      let errorMessage = 'Sorry, an unexpected error occurred. Please try again.';
+      if (error instanceof APIError || error instanceof ParsingError) {
+          errorMessage = error.message;
+      } else if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+           errorMessage = 'A network error occurred. Please check your connection and try again.';
+      }
+      setErrorMessageInChat(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -206,18 +224,27 @@ function App() {
       
       } catch (error) {
         console.error(`Improvement step ${i+1} failed:`, error);
-        setChatHistory(prev => [...prev.slice(0,-1), { // Remove spinner message
-          author: MessageAuthor.AI,
-          content: `Sorry, an error occurred during improvement step ${i + 1}: ${(error as Error).message}`,
-        }]);
+        
+        let errorMessage = `An error occurred during improvement step ${i + 1}.`;
+        if (error instanceof APIError || error instanceof ParsingError) {
+            errorMessage = error.message;
+        } else if (error instanceof Error && error.message.includes('timed out')) {
+            errorMessage = `The component preview took too long to load for the screenshot.`;
+        } else if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+            errorMessage = 'A network error occurred. Please check your connection.';
+        }
+        
+        setErrorMessageInChat(errorMessage);
         break; // Exit loop on error
       }
     }
     setIsImproving(false);
-    setChatHistory(prev => [...prev, {
-        author: MessageAuthor.AI,
-        content: `Auto-improvement complete! I made ${improvementHistory.length} of ${autoImproveSteps} planned enhancements.`,
-    }]);
+    if (improvementHistory.length > 0) {
+        setChatHistory(prev => [...prev, {
+            author: MessageAuthor.AI,
+            content: `Auto-improvement complete! I made ${improvementHistory.length} of ${autoImproveSteps} planned enhancements.`,
+        }]);
+    }
   };
 
 
